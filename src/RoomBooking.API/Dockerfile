@@ -21,7 +21,7 @@ RUN dotnet restore src/RoomBooking.API/RoomBooking.API.csproj \
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 
 # Create non-root app user for better security
-RUN adduser --disabled-password --gecos "" appuser
+RUN useradd -m -s /usr/sbin/nologin appuser
 USER appuser
 
 WORKDIR /app
