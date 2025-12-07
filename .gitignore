@@ -1,0 +1,85 @@
+# Git ignore for .NET and Docker projects
+
+# ---------------------------
+# OS-specific artifacts
+# ---------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---------------------------
+# IDE/editor directories
+# ---------------------------
+.vs/
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# ---------------------------
+# Build outputs
+# ---------------------------
+**/bin/
+**/obj/
+**/out/
+**/publish/
+
+# ---------------------------
+# Logs
+# ---------------------------
+**/*.log
+logs/
+LogFiles/
+
+# ---------------------------
+# Test & Coverage artifacts
+# ---------------------------
+TestResults/
+coverage/
+**/*.coverage
+**/*.coveragexml
+
+# ---------------------------
+# NuGet (legacy local packages folder)
+# ---------------------------
+packages/
+
+# ---------------------------
+# ReSharper/Rider & tooling caches
+# ---------------------------
+_ReSharper*/
+*.DotSettings.user
+*.DotSettings
+**/.cache/
+
+# ---------------------------
+# StyleCop
+# ---------------------------
+StyleCop.Cache
+
+# ---------------------------
+# Temporary files
+# ---------------------------
+*.tmp
+*.temp
+*.swp
+*~
+~*
+
+# ---------------------------
+# Docker & local environment
+# ---------------------------
+.env
+.env.*
+docker-compose.override.yml
+docker-compose.local.yml
+docker-data/
+data/
+
+# ---------------------------
+# Secrets (do not commit)
+# ---------------------------
+*.secret
+*.secrets

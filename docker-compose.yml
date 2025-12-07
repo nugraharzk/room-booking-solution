@@ -1,0 +1,59 @@
+version: "3.9"
+
+name: roombooking
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: roombooking-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: RoomBookingDb
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d RoomBookingDb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - roombooking-net
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: RoomBooking/src/RoomBooking.API/Dockerfile
+    container_name: roombooking-api
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=RoomBookingDb;Username=postgres;Password=postgres;Include Error Detail=true"
+      Jwt__Issuer: "RoomBookingAuthServer"
+      Jwt__Audience: "RoomBookingAPI"
+      Jwt__Secret: "ChangeThisInProd_SuperSecretKey123!"
+      Jwt__ValidateIssuer: "true"
+      Jwt__ValidateAudience: "true"
+      Jwt__ValidateLifetime: "true"
+      Jwt__ValidateIssuerSigningKey: "true"
+      Jwt__ClockSkewInSeconds: "60"
+      Jwt__RequireHttpsMetadata: "false"
+      Jwt__NameClaimType: "name"
+      Jwt__RoleClaimType: "role"
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - roombooking-net
+    restart: unless-stopped
+
+volumes:
+  db-data:
+
+networks:
+  roombooking-net:

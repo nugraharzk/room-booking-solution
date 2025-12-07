@@ -1,0 +1,59 @@
+# .dockerignore - reduce Docker build context for RoomBooking solution
+
+# Version control
+.git
+.github/
+.gitmodules
+
+# IDE and editor directories
+.vs/
+.vscode/
+.idea/
+
+# OS-specific artifacts
+**/.DS_Store
+**/Thumbs.db
+
+# Build outputs (dotnet, general)
+**/bin/
+**/obj/
+**/out/
+**/publish/
+**/dist/
+
+# Test and coverage artifacts
+**/TestResults/
+**/coverage/
+**/*.coverage
+**/*.coveragexml
+**/.nyc_output/
+
+# Logs
+**/*.log
+**/logs/
+**/LogFiles/
+
+# Node.js (if present)
+**/node_modules/
+
+# User-specific and temp files
+**/*.user
+**/*.suo
+**/*.tmp
+**/~*
+**/*.swp
+
+# Environment and local config (do not include secrets in build context)
+.env
+.env.*
+*.secret
+*.secrets
+
+# Docker Compose and local overrides (not needed in image build context)
+docker-compose.yml
+docker-compose.*.yml
+
+# Cache directories
+**/.cache/
+**/.gradle/
+**/.terraform/
