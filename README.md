@@ -25,7 +25,7 @@ A clean, production-ready ASP.NET Core Web API for internal room booking with JW
 
    Services:
    - `db`: PostgreSQL 16 listening on `localhost:5432`
-   - `api`: RoomBooking API listening on `http://localhost:8080`
+   - `api`: RoomBooking API listening on `http://localhost:5050`
 
 2. Apply EF Core migrations against the running PostgreSQL:
 
@@ -45,13 +45,13 @@ A clean, production-ready ASP.NET Core Web API for internal room booking with JW
    - Health check:
 
      ```
-     curl http://localhost:8080/health
+     curl http://localhost:5050/health
      ```
 
    - OpenAPI (Development only):
 
      ```
-     http://localhost:8080/openapi/v1.json
+     http://localhost:5050/openapi/v1.json
      ```
 
 ## Local development (without Docker)
@@ -88,7 +88,7 @@ A clean, production-ready ASP.NET Core Web API for internal room booking with JW
    dotnet run -p RoomBooking/src/RoomBooking.API/RoomBooking.API.csproj
    ```
 
-   - API will listen on `http://localhost:8080` (configurable in `Dockerfile` and environment).
+   - API will listen on `http://localhost:5050` (configurable in `Dockerfile` and environment).
    - Run migrations (if not applied yet):
 
      ```
@@ -142,12 +142,13 @@ Authorization: Bearer <your-jwt-token>
 - `RoomBooking/src/RoomBooking.API/Dockerfile`
   - Multi-stage build
   - Runs as non-root user `appuser`
-  - Exposes port `8080`
+  - Exposes port `5050`
   - Sets `ConnectionStrings__DefaultConnection` for container networking with service `db`
 
 - `docker-compose.yml`
   - `db` service: Postgres 16 with default credentials (dev-only)
   - `api` service: builds API and depends on `db` becoming healthy
+  - Maps `5050:5050` for the API container
   - Environment variables override `appsettings.json` via double-underscore (`__`) notation
 
 - `.dockerignore`

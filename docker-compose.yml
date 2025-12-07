@@ -44,7 +44,7 @@ services:
       Jwt__NameClaimType: "name"
       Jwt__RoleClaimType: "role"
     ports:
-      - "8080:8080"
+      - "5050:5050"
     depends_on:
       db:
         condition: service_healthy

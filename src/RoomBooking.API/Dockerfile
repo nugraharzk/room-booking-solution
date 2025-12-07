@@ -30,11 +30,11 @@ WORKDIR /app
 COPY --from=build /app/publish ./
 
 # Environment & ports
-ENV ASPNETCORE_URLS=http://+:8080
+ENV ASPNETCORE_URLS=http://+:5050
 # Default Postgres connection string; override via environment in deployment
 ENV ConnectionStrings__DefaultConnection="Host=db;Port=5432;Database=RoomBookingDb;Username=postgres;Password=postgres;Include Error Detail=true"
 
-EXPOSE 8080
+EXPOSE 5050
 
 # Run the API
 ENTRYPOINT ["dotnet", "RoomBooking.API.dll"]
