@@ -27,7 +27,7 @@ services:
   api:
     build:
       context: .
-      dockerfile: RoomBooking/src/RoomBooking.API/Dockerfile
+      dockerfile: src/RoomBooking.API/Dockerfile
     container_name: roombooking-api
     environment:
       ASPNETCORE_ENVIRONMENT: "Development"
