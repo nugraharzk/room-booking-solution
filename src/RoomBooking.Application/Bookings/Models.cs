@@ -79,6 +79,10 @@ namespace RoomBooking.Application.Bookings
         bool IsActive
     ) : IRequest<RoomDto>;
 
+    public sealed record DeleteRoomCommand(
+        [property: Required] Guid RoomId
+    ) : IRequest<Unit>;
+
     // Rooms - Queries
 
     public sealed record GetRoomByIdQuery(
@@ -98,8 +102,7 @@ namespace RoomBooking.Application.Bookings
     public sealed record CreateBookingCommand(
         [property: Required] Guid RoomId,
         [property: Required] Guid CreatedByUserId,
-        DateTimeOffset Start,
-        DateTimeOffset End,
+        DateOnly Date,
         [property: MaxLength(200)] string? Subject
     ) : IRequest<BookingDto>;
 

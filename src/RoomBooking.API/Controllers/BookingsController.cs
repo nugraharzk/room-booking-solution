@@ -42,8 +42,7 @@ namespace RoomBooking.API.Controllers
             var cmd = new CreateBookingCommand(
                 RoomId: body.RoomId,
                 CreatedByUserId: userId,
-                Start: body.Start,
-                End: body.End,
+                Date: body.Date,
                 Subject: body.Subject
             );
 
@@ -68,8 +67,8 @@ namespace RoomBooking.API.Controllers
         /// <summary>
         /// Lists all bookings (Admin only).
         /// </summary>
-        [HttpGet("all")]
-        [Authorize(Policy = Policies.RequireAdmin)]
+        [HttpGet]
+        [Authorize(Policy = Policies.RequireManager)]
         [ProducesResponseType(typeof(BookingDto[]), StatusCodes.Status200OK)]
         public async Task<ActionResult<BookingDto[]>> ListAll(CancellationToken ct)
         {
@@ -118,7 +117,7 @@ namespace RoomBooking.API.Controllers
         /// Confirms a booking.
         /// </summary>
         [HttpPost("{id:guid}/confirm")]
-        [Authorize(Policy = Policies.BookingsWrite)]
+        [Authorize(Policy = Policies.RequireManager)]
         [ProducesResponseType(typeof(BookingDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<BookingDto>> Confirm([FromRoute] Guid id, CancellationToken ct)
@@ -208,8 +207,7 @@ namespace RoomBooking.API.Controllers
         /// </summary>
     public sealed record CreateBookingRequest(
         Guid RoomId,
-        DateTimeOffset Start,
-        DateTimeOffset End,
+        DateOnly Date,
         string? Subject
     );
 

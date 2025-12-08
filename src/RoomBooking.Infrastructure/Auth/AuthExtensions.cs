@@ -109,14 +109,24 @@ namespace RoomBooking.Infrastructure.Auth
                     .Build();
 
                 // Role-based policies
+                // Role-based policies with fallback for explicit "role" claim type
                 options.AddPolicy(Policies.RequireAdmin, policy =>
-                    policy.RequireRole(Roles.Admin));
+                    policy.RequireAssertion(context => 
+                        context.User.IsInRole(Roles.Admin) || 
+                        context.User.HasClaim(c => (c.Type == "role" || c.Type == ClaimTypes.Role) && c.Value == Roles.Admin)));
 
                 options.AddPolicy(Policies.RequireManager, policy =>
-                    policy.RequireRole(Roles.Manager));
+                     policy.RequireAssertion(context => 
+                        context.User.IsInRole(Roles.Manager) || 
+                        context.User.IsInRole(Roles.Admin) ||
+                        context.User.HasClaim(c => (c.Type == "role" || c.Type == ClaimTypes.Role) && (c.Value == Roles.Manager || c.Value == Roles.Admin))));
 
                 options.AddPolicy(Policies.RequireEmployee, policy =>
-                    policy.RequireRole(Roles.Employee));
+                     policy.RequireAssertion(context => 
+                        context.User.IsInRole(Roles.Employee) || 
+                        context.User.IsInRole(Roles.Manager) ||
+                        context.User.IsInRole(Roles.Admin) ||
+                        context.User.HasClaim(c => (c.Type == "role" || c.Type == ClaimTypes.Role) && (c.Value == Roles.Employee || c.Value == Roles.Manager || c.Value == Roles.Admin))));
 
                 // Scope-based policies (supports both "scope" and "scp" claim types)
                 options.AddPolicy(Policies.BookingsRead, policy =>

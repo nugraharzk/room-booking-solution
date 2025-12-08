@@ -13,7 +13,14 @@ namespace RoomBooking.Domain.Entities
         public bool IsActive { get; private set; }
         public DateTimeOffset CreatedAt { get; private set; }
 
-        private User() { }
+        private User() 
+        {
+            Email = null!;
+            PasswordHash = null!;
+            FirstName = null!;
+            LastName = null!;
+            Role = null!;
+        }
 
         public User(Guid id, string email, string passwordHash, string firstName, string lastName, string role)
         {
@@ -32,7 +39,7 @@ namespace RoomBooking.Domain.Entities
         }
 
         public static User Create(string email, string passwordHash, string firstName, string lastName, string role)
-            => new User(Guid.NewGuid(), email, passwordHash, firstName, lastName, role);
+            => new(Guid.NewGuid(), email, passwordHash, firstName, lastName, role);
 
         public void UpdateRole(string newRole)
         {

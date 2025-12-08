@@ -70,7 +70,7 @@ namespace RoomBooking.Domain.Tests
             Assert.Equal(BookingStatus.Cancelled, booking.Status);
         }
 
-        private Booking CreateValidBooking()
+        private static Booking CreateValidBooking()
         {
             var roomId = Guid.NewGuid();
             var userId = Guid.NewGuid();

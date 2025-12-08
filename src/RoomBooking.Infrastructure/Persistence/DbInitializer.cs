@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using RoomBooking.Domain.Entities;
 using RoomBooking.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 
 namespace RoomBooking.Infrastructure.Persistence
 {
@@ -9,8 +10,8 @@ namespace RoomBooking.Infrastructure.Persistence
     {
         public static void Initialize(AppDbContext context)
         {
-            // Ensure the database is created and migrated
-            context.Database.EnsureCreated();
+            // Apply any pending migrations
+            context.Database.Migrate();
 
             SeedRooms(context);
             SeedUsers(context);
@@ -35,25 +36,41 @@ namespace RoomBooking.Infrastructure.Persistence
 
         private static void SeedUsers(AppDbContext context)
         {
-            if (context.Users.Any()) return;
+            if (!context.Users.Any(u => u.Email == "admin@example.com"))
+            {
+                var admin = User.Create(
+                    "admin@example.com",
+                    BCrypt.Net.BCrypt.HashPassword("admin123"),
+                    "Admin",
+                    "User",
+                    RoomBooking.Infrastructure.Auth.Roles.Admin
+                );
+                context.Users.Add(admin);
+            }
 
-            var admin = User.Create(
-                "admin@example.com",
-                BCrypt.Net.BCrypt.HashPassword("admin123"),
-                "Admin",
-                "User",
-                RoomBooking.Infrastructure.Auth.Roles.Admin
-            );
+            if (!context.Users.Any(u => u.Email == "manager@example.com"))
+            {
+                var manager = User.Create(
+                    "manager@example.com",
+                    BCrypt.Net.BCrypt.HashPassword("manager123"),
+                    "Manager",
+                    "User",
+                    RoomBooking.Infrastructure.Auth.Roles.Manager
+                );
+                context.Users.Add(manager);
+            }
 
-            var user = User.Create(
-                "user@example.com",
-                BCrypt.Net.BCrypt.HashPassword("user123"),
-                "Normal",
-                "User",
-                RoomBooking.Infrastructure.Auth.Roles.User
-            );
-
-            context.Users.AddRange(admin, user);
+            if (!context.Users.Any(u => u.Email == "user@example.com"))
+            {
+                var user = User.Create(
+                    "user@example.com",
+                    BCrypt.Net.BCrypt.HashPassword("user123"),
+                    "Normal",
+                    "User",
+                    RoomBooking.Infrastructure.Auth.Roles.User
+                );
+                context.Users.Add(user);
+            }
         }
     }
 }

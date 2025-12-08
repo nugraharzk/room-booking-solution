@@ -11,7 +11,7 @@ services:
       POSTGRES_PASSWORD: "postgres123"
       POSTGRES_DB: "roombooking"
     ports:
-      - "5433:5432"
+      - "5432:5432"
     volumes:
       - db-data:/var/lib/postgresql/data
     healthcheck:
@@ -44,8 +44,8 @@ services:
       Jwt__NameClaimType: "name"
       Jwt__RoleClaimType: "role"
     ports:
-      - "5000:5050"
-      - "5001:5050"
+      - "5200:5050"
+      - "5201:5050"
     depends_on:
       db:
         condition: service_healthy

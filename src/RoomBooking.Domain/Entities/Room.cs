@@ -18,7 +18,11 @@ namespace RoomBooking.Domain.Entities
         public DateTimeOffset? UpdatedAt { get; private set; }
 
         // EF Core / Serialization constructor
-        private Room() { }
+        private Room() 
+        {
+            Name = null!;
+            Location = null;
+        }
 
         private Room(Guid id, string name, string? location, int capacity, bool isActive)
         {
@@ -36,7 +40,7 @@ namespace RoomBooking.Domain.Entities
         }
 
         public static Room Create(string name, int capacity, string? location = null)
-            => new Room(Guid.NewGuid(), name, location, capacity, isActive: true);
+            => new(Guid.NewGuid(), name, location, capacity, isActive: true);
 
         public void Rename(string newName)
         {
@@ -67,7 +71,7 @@ namespace RoomBooking.Domain.Entities
         public bool IsAvailable(TimeRange requested, IEnumerable<Booking> existingBookings)
         {
             if (!IsActive) return false;
-            if (requested is null) throw new ArgumentNullException(nameof(requested));
+            ArgumentNullException.ThrowIfNull(requested);
 
             var activeBookings = existingBookings?.Where(b => b.Status != BookingStatus.Cancelled) ?? Enumerable.Empty<Booking>();
             return activeBookings.All(b => !b.TimeRange.Overlaps(requested));
@@ -93,13 +97,16 @@ namespace RoomBooking.Domain.Entities
         public DateTimeOffset? StatusChangedAt { get; private set; }
 
         // EF Core / Serialization constructor
-        private Booking() { }
+        private Booking() 
+        {
+            TimeRange = null!;
+        }
 
         private Booking(Guid id, Guid roomId, Guid createdByUserId, TimeRange timeRange, string? subject)
         {
             if (roomId == Guid.Empty) throw new ArgumentException("RoomId is required.", nameof(roomId));
             if (createdByUserId == Guid.Empty) throw new ArgumentException("CreatedByUserId is required.", nameof(createdByUserId));
-            if (timeRange is null) throw new ArgumentNullException(nameof(timeRange));
+            ArgumentNullException.ThrowIfNull(timeRange);
 
             // Basic time rule: booking must end in the future.
             if (timeRange.End <= DateTimeOffset.UtcNow)
@@ -126,7 +133,7 @@ namespace RoomBooking.Domain.Entities
         /// </summary>
         public void Reschedule(TimeRange newRange, IEnumerable<Booking>? existingBookings = null)
         {
-            if (newRange is null) throw new ArgumentNullException(nameof(newRange));
+            ArgumentNullException.ThrowIfNull(newRange);
             if (newRange.End <= DateTimeOffset.UtcNow)
                 throw new InvalidOperationException("New schedule must end in the future.");
 
@@ -226,7 +233,7 @@ namespace RoomBooking.Domain.Entities
         }
 
         public static TimeRange Create(DateTimeOffset start, DateTimeOffset end)
-            => new TimeRange(start, end);
+            => new(start, end);
 
         public TimeSpan Duration => End - Start;
 

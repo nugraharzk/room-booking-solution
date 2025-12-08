@@ -3,7 +3,7 @@
 # ---------------------------------------------------------
 # Build stage
 # ---------------------------------------------------------
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 
 WORKDIR /src
@@ -18,7 +18,7 @@ RUN dotnet restore src/RoomBooking.API/RoomBooking.API.csproj \
 # ---------------------------------------------------------
 # Runtime stage
 # ---------------------------------------------------------
-FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 
 # Create non-root app user for better security
 RUN useradd -m -s /usr/sbin/nologin appuser

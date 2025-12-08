@@ -9,6 +9,8 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
+using System.Linq; // Ensure Linq is available
+
 namespace RoomBooking.API.Controllers
 {
     [ApiController]
@@ -84,7 +86,8 @@ namespace RoomBooking.API.Controllers
             }
             else
             {
-                claims.Add(new Claim("scope", "bookings.read"));
+                // Standard users need write access to create/manage their own bookings
+                claims.Add(new Claim("scope", "bookings.read bookings.write"));
             }
 
             var token = new JwtSecurityToken(
@@ -106,17 +109,17 @@ namespace RoomBooking.API.Controllers
 
     public class LoginResponse
     {
-        public string Token { get; set; }
+        public required string Token { get; set; }
         public int ExpiresIn { get; set; }
-        public UserDto User { get; set; }
+        public required UserDto User { get; set; }
     }
 
     public class UserDto
     {
         public Guid Id { get; set; }
-        public string Email { get; set; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public string Role { get; set; }
+        public required string Email { get; set; }
+        public required string FirstName { get; set; }
+        public required string LastName { get; set; }
+        public required string Role { get; set; }
     }
 }

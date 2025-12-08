@@ -4,7 +4,7 @@ A complete full-stack solution for internal room booking, featuring a .NET 9 Web
 
 ## Overview
 
-- **Backend**: ASP.NET Core 9 Web API using Clean Architecture, CQRS (MediatR), EF Core, and PostgreSQL.
+- **Backend**: ASP.NET Core 8 Web API using Clean Architecture, CQRS (MediatR), EF Core, and PostgreSQL.
 - **Frontend**: React 18, TypeScript, Vite, Tailwind CSS, and Shadcn UI.
 - **Infrastructure**: Containerized with Docker Compose.
 
@@ -18,7 +18,7 @@ A complete full-stack solution for internal room booking, featuring a .NET 9 Web
 
 ## Requirements
 
-- .NET 9 SDK
+- .NET 8 SDK
 - Node.js 18+ & npm
 - Docker Desktop (for containerized setup)
 - Git
@@ -27,22 +27,36 @@ A complete full-stack solution for internal room booking, featuring a .NET 9 Web
 
 1. **Start Services**:
    From the solution root, run:
+
    ```bash
    docker compose up -d --build
    ```
 
    - **API**: `http://localhost:5200`
-   - **Frontend**: `http://localhost:5173` (proxies to API)
+   - **Frontend**: `http://localhost:3200` (proxies to API)
    - **Database**: PostgreSQL on `localhost:5433`
 
 2. **Access the App**:
-   Open `http://localhost:5173` in your browser.
+   Open `http://localhost:3200` in your browser.
 
    **Default Credentials**:
+
    - **Admin**: `admin@example.com` / `admin123`
    - **User**: `user@example.com` / `user123`
 
-   *Note: Database is automatically seeded on startup in Development mode.*
+   _Note: Database is automatically seeded on startup in Development mode._
+
+   _Note: Database is automatically seeded on startup in Development mode._
+
+## Database Setup (Production / Manual)
+
+A SQL script `script.sql` has been generated in `src/RoomBooking.API/`. You can use this to set up the database manually.
+
+To regenerate this script:
+
+```bash
+dotnet run --project src/RoomBooking.API -- generate-script
+```
 
 ## Local Development (Manual Setup)
 
@@ -68,7 +82,7 @@ A complete full-stack solution for internal room booking, featuring a .NET 9 Web
    ```bash
    npm run dev
    ```
-   Frontend will run on `http://localhost:5173`.
+   Frontend will run on `http://localhost:3200`.
 
 ## Authentication & Authorization
 

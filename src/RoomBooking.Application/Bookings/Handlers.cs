@@ -114,6 +114,28 @@ namespace RoomBooking.Application.Bookings
         }
     }
 
+    internal sealed class DeleteRoomHandler : IRequestHandler<DeleteRoomCommand, Unit>
+    {
+        private readonly IUnitOfWork _uow;
+
+        public DeleteRoomHandler(IUnitOfWork uow)
+        {
+            _uow = uow;
+        }
+
+        public async Task<Unit> Handle(DeleteRoomCommand request, CancellationToken ct)
+        {
+            var room = await _uow.Rooms.GetByIdAsync(request.RoomId, ct);
+            if (room is null)
+                throw new KeyNotFoundException($"Room '{request.RoomId}' was not found.");
+
+            _uow.Rooms.Remove(room);
+            await _uow.SaveChangesAsync(ct);
+
+            return Unit.Value;
+        }
+    }
+
     // Rooms - Query Handlers
 
     internal sealed class GetRoomByIdHandler : IRequestHandler<GetRoomByIdQuery, RoomDto?>
@@ -201,8 +223,9 @@ namespace RoomBooking.Application.Bookings
                 throw new ArgumentException("RoomId is required.", nameof(request.RoomId));
             if (request.CreatedByUserId == Guid.Empty)
                 throw new ArgumentException("CreatedByUserId is required.", nameof(request.CreatedByUserId));
-            if (request.End <= request.Start)
-                throw new ArgumentException("End must be greater than Start.");
+            // Create full day booking (00:00 to 23:59 UTC)
+            var start = new DateTimeOffset(request.Date.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero);
+            var end = new DateTimeOffset(request.Date.ToDateTime(TimeOnly.MaxValue), TimeSpan.Zero);
 
             var room = await _uow.Rooms.GetByIdAsync(request.RoomId, ct);
             if (room is null)
@@ -210,8 +233,8 @@ namespace RoomBooking.Application.Bookings
             if (!room.IsActive)
                 throw new InvalidOperationException("Room is not active for booking.");
 
-            if (request.End <= DateTimeOffset.UtcNow)
-                throw new InvalidOperationException("Booking end must be in the future.");
+            if (end <= DateTimeOffset.UtcNow)
+                throw new InvalidOperationException("Booking date must be in the future.");
 
             // Use Serializable transaction to prevent double booking race conditions
             using var tx = await _uow.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, ct);
@@ -219,15 +242,15 @@ namespace RoomBooking.Application.Bookings
             // Overlap check
             var hasOverlaps = await _uow.Bookings.HasOverlapsAsync(
                 request.RoomId,
-                request.Start,
-                request.End,
+                start,
+                end,
                 excludeBookingId: null,
                 ct: ct);
 
             if (hasOverlaps)
                 throw new InvalidOperationException("Booking overlaps with an existing booking.");
 
-            var range = TimeRange.Create(request.Start, request.End);
+            var range = TimeRange.Create(start, end);
             var booking = Booking.Create(request.RoomId, request.CreatedByUserId, range, request.Subject);
 
             await _uow.Bookings.AddAsync(booking, ct);

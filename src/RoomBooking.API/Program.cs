@@ -11,6 +11,9 @@ using RoomBooking.Application.Interfaces;
 using RoomBooking.Infrastructure.Auth;
 using RoomBooking.Infrastructure.Persistence;
 
+// Load .env file
+DotNetEnv.Env.Load();
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Configuration
@@ -61,18 +64,35 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("DefaultCors", policy =>
     {
+        var allowedOrigins = configuration["Cors:AllowedOrigins"]?
+            .Split(';', StringSplitOptions.RemoveEmptyEntries)
+            ??
+            [
+                "https://localhost:5201",
+                "http://localhost:5200",
+                "http://localhost:5173",
+                "http://localhost:3200"
+            ];
+
         policy
             .AllowAnyHeader()
             .AllowAnyMethod()
-            .WithOrigins(
-                "https://localhost:5201",
-                "http://localhost:5200",
-                "http://localhost:5173" // Vite default port
-            );
+            .WithOrigins(allowedOrigins);
     });
 });
 
 var app = builder.Build();
+
+// Check for script generation flag
+if (args.Contains("generate-script"))
+{
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    var script = db.Database.GenerateCreateScript();
+    System.IO.File.WriteAllText("script.sql", script);
+    Console.WriteLine("Database script generated successfully to script.sql");
+    return;
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -82,18 +102,15 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 
     // Auto-migrate and seed in Development
-    using (var scope = app.Services.CreateScope())
-    {
-        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        // Initialize ensures Created and Migrated, then seeds data
-        DbInitializer.Initialize(db);
-    }
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    // Initialize ensures Created and Migrated, then seeds data
+    DbInitializer.Initialize(db);
 }
 
 // Centralized exception handling with ProblemDetails
 app.UseExceptionHandler();
-
-    // app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
 
 // Security middleware
 app.UseCors("DefaultCors");

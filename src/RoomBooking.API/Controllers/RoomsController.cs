@@ -65,7 +65,10 @@ namespace RoomBooking.API.Controllers
         /// <summary>
         /// Lists active rooms.
         /// </summary>
-        [HttpGet]
+        /// <summary>
+        /// Lists active rooms.
+        /// </summary>
+        [HttpGet("active")]
         [Authorize(Policy = Policies.BookingsRead)]
         [ProducesResponseType(typeof(IReadOnlyList<RoomDto>), StatusCodes.Status200OK)]
         public async Task<ActionResult<IReadOnlyList<RoomDto>>> ListActive(CancellationToken ct)
@@ -77,7 +80,7 @@ namespace RoomBooking.API.Controllers
         /// <summary>
         /// Lists all rooms (including inactive). Admin only.
         /// </summary>
-        [HttpGet("all")]
+        [HttpGet]
         [Authorize(Policy = Policies.RequireAdmin)]
         [ProducesResponseType(typeof(IReadOnlyList<RoomDto>), StatusCodes.Status200OK)]
         public async Task<ActionResult<IReadOnlyList<RoomDto>>> ListAll(CancellationToken ct)
@@ -114,6 +117,19 @@ namespace RoomBooking.API.Controllers
         {
             var result = await _mediator.Send(new SetRoomActiveCommand(id, body.IsActive), ct);
             return Ok(result);
+        }
+
+        /// <summary>
+        /// Deletes a room.
+        /// </summary>
+        [HttpDelete("{id:guid}")]
+        [Authorize(Policy = Policies.RequireAdmin)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> Delete([FromRoute] Guid id, CancellationToken ct)
+        {
+            await _mediator.Send(new DeleteRoomCommand(id), ct);
+            return NoContent();
         }
     }
 
