@@ -73,6 +73,7 @@ StyleCop.Cache
 # ---------------------------
 .env
 .env.*
+!.env.example
 docker-compose.override.yml
 docker-compose.local.yml
 docker-data/

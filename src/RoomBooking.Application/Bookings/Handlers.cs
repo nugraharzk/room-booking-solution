@@ -213,6 +213,9 @@ namespace RoomBooking.Application.Bookings
             if (request.End <= DateTimeOffset.UtcNow)
                 throw new InvalidOperationException("Booking end must be in the future.");
 
+            // Use Serializable transaction to prevent double booking race conditions
+            using var tx = await _uow.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, ct);
+
             // Overlap check
             var hasOverlaps = await _uow.Bookings.HasOverlapsAsync(
                 request.RoomId,
@@ -229,6 +232,8 @@ namespace RoomBooking.Application.Bookings
 
             await _uow.Bookings.AddAsync(booking, ct);
             await _uow.SaveChangesAsync(ct);
+            
+            await tx.CommitAsync(ct);
 
             return booking.ToDto();
         }

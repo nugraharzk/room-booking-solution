@@ -31,6 +31,7 @@ builder.Services.AddSwaggerGen();
 
 // ProblemDetails for standardized error responses
 builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<RoomBooking.API.Infrastructure.GlobalExceptionHandler>();
 
 // MediatR (scan Application assembly)
 builder.Services.AddMediatR(cfg =>

@@ -396,9 +396,19 @@ namespace RoomBooking.Infrastructure.Persistence
     // Unit of Work implementation
     // ---------------------------
 
+
+
+
+
+
+
     public sealed class EfUnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
     {
         private readonly AppDbContext _dbContext;
+
+        public IRoomRepository Rooms { get; }
+        public IBookingRepository Bookings { get; }
+        public IUserRepository Users { get; }
 
         public EfUnitOfWork(AppDbContext dbContext)
         {
@@ -408,16 +418,14 @@ namespace RoomBooking.Infrastructure.Persistence
             Users = new UserRepository(dbContext);
         }
 
-        public IRoomRepository Rooms { get; }
-        public IBookingRepository Bookings { get; }
-        public IUserRepository Users { get; }
-
-        public Task<int> SaveChangesAsync(CancellationToken ct = default)
-            => _dbContext.SaveChangesAsync(ct);
-
-        public async Task<ITransaction> BeginTransactionAsync(CancellationToken ct = default)
+        public async Task<int> SaveChangesAsync(CancellationToken ct = default)
         {
-            var tx = await _dbContext.Database.BeginTransactionAsync(ct).ConfigureAwait(false);
+            return await _dbContext.SaveChangesAsync(ct).ConfigureAwait(false);
+        }
+
+        public async Task<ITransaction> BeginTransactionAsync(System.Data.IsolationLevel isolationLevel = System.Data.IsolationLevel.ReadCommitted, CancellationToken ct = default)
+        {
+            var tx = await _dbContext.Database.BeginTransactionAsync(isolationLevel, ct).ConfigureAwait(false);
             return new EfTransaction(tx);
         }
 

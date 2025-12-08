@@ -169,6 +169,6 @@ namespace RoomBooking.Application.Interfaces
         /// <summary>
         /// Begins a new transaction that should be disposed or committed explicitly.
         /// </summary>
-        Task<ITransaction> BeginTransactionAsync(CancellationToken ct = default);
+        Task<ITransaction> BeginTransactionAsync(System.Data.IsolationLevel isolationLevel = System.Data.IsolationLevel.ReadCommitted, CancellationToken ct = default);
     }
 }
