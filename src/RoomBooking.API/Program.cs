@@ -25,8 +25,9 @@ builder.Services
         o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     });
 
-// OpenAPI (minimal built-in OpenAPI support in .NET 8)
-builder.Services.AddOpenApi();
+// OpenAPI / Swagger
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 // ProblemDetails for standardized error responses
 builder.Services.AddProblemDetails();
@@ -63,8 +64,9 @@ builder.Services.AddCors(options =>
             .AllowAnyHeader()
             .AllowAnyMethod()
             .WithOrigins(
-                "https://localhost:5001",
-                "http://localhost:5000"
+                "https://localhost:5201",
+                "http://localhost:5200",
+                "http://localhost:5173" // Vite default port
             );
     });
 });
@@ -74,14 +76,23 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    // Built-in OpenAPI
-    app.MapOpenApi();
+    // Swagger
+    app.UseSwagger();
+    app.UseSwaggerUI();
+
+    // Auto-migrate and seed in Development
+    using (var scope = app.Services.CreateScope())
+    {
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        // Initialize ensures Created and Migrated, then seeds data
+        DbInitializer.Initialize(db);
+    }
 }
 
 // Centralized exception handling with ProblemDetails
 app.UseExceptionHandler();
 
-app.UseHttpsRedirection();
+    // app.UseHttpsRedirection();
 
 // Security middleware
 app.UseCors("DefaultCors");

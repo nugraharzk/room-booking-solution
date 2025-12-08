@@ -63,6 +63,11 @@ namespace RoomBooking.Application.Interfaces
         Task<IReadOnlyList<Room>> ListActiveAsync(CancellationToken ct = default);
 
         /// <summary>
+        /// Lists all rooms (including inactive).
+        /// </summary>
+        Task<IReadOnlyList<Room>> ListAllAsync(CancellationToken ct = default);
+
+        /// <summary>
         /// Returns true if a room with the given name already exists.
         /// </summary>
         Task<bool> ExistsByNameAsync(string name, CancellationToken ct = default);
@@ -102,6 +107,32 @@ namespace RoomBooking.Application.Interfaces
             DateTimeOffset end,
             Guid? excludeBookingId = null,
             CancellationToken ct = default);
+
+        /// <summary>
+        /// Lists all bookings (Admin).
+        /// </summary>
+        Task<IReadOnlyList<Booking>> ListAllAsync(CancellationToken ct = default);
+
+        /// <summary>
+        /// Lists bookings created by a specific user.
+        /// </summary>
+        Task<IReadOnlyList<Booking>> ListByUserAsync(Guid userId, CancellationToken ct = default);
+    }
+
+    /// <summary>
+    /// Repository for managing users.
+    /// </summary>
+    public interface IUserRepository : IRepository<User, Guid>
+    {
+        /// <summary>
+        /// Gets a user by their email address.
+        /// </summary>
+        Task<User?> GetByEmailAsync(string email, CancellationToken ct = default);
+
+        /// <summary>
+        /// Lists all users.
+        /// </summary>
+        Task<IReadOnlyList<User>> ListAllAsync(CancellationToken ct = default);
     }
 
     /// <summary>
@@ -127,6 +158,7 @@ namespace RoomBooking.Application.Interfaces
     {
         IRoomRepository Rooms { get; }
         IBookingRepository Bookings { get; }
+        IUserRepository Users { get; }
 
         /// <summary>
         /// Persists changes to the underlying store.

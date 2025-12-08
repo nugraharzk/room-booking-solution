@@ -75,6 +75,18 @@ namespace RoomBooking.API.Controllers
         }
 
         /// <summary>
+        /// Lists all rooms (including inactive). Admin only.
+        /// </summary>
+        [HttpGet("all")]
+        [Authorize(Policy = Policies.RequireAdmin)]
+        [ProducesResponseType(typeof(IReadOnlyList<RoomDto>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<IReadOnlyList<RoomDto>>> ListAll(CancellationToken ct)
+        {
+            var list = await _mediator.Send(new ListAllRoomsQuery(), ct);
+            return Ok(list);
+        }
+
+        /// <summary>
         /// Updates room details (name, capacity, optional location).
         /// </summary>
         [HttpPut("{id:guid}")]

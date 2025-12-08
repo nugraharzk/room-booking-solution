@@ -11,11 +11,11 @@ services:
       POSTGRES_PASSWORD: "postgres123"
       POSTGRES_DB: "roombooking"
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - db-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d roombooking"]
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d roombooking" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -31,7 +31,7 @@ services:
     container_name: roombooking-api
     environment:
       ASPNETCORE_ENVIRONMENT: "Development"
-      ConnectionStrings__DefaultConnection: "Host=localhost;Port=5432;Database=roombooking;Username=postgres;Password=postgres123;Include Error Detail=true"
+      ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=roombooking;Username=postgres;Password=postgres123;Include Error Detail=true"
       Jwt__Issuer: "RoomBookingAuthServer"
       Jwt__Audience: "RoomBookingAPI"
       Jwt__Secret: "ChangeThisInProd_SuperSecretKey123!"
@@ -44,7 +44,8 @@ services:
       Jwt__NameClaimType: "name"
       Jwt__RoleClaimType: "role"
     ports:
-      - "5050:5050"
+      - "5000:5050"
+      - "5001:5050"
     depends_on:
       db:
         condition: service_healthy
@@ -54,6 +55,7 @@ services:
 
 volumes:
   db-data:
+
 
 networks:
   roombooking-net:

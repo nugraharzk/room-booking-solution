@@ -23,6 +23,7 @@ namespace RoomBooking.Infrastructure.Persistence
 
         public DbSet<Room> Rooms => Set<Room>();
         public DbSet<Booking> Bookings => Set<Booking>();
+        public DbSet<User> Users => Set<User>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -30,6 +31,7 @@ namespace RoomBooking.Infrastructure.Persistence
 
             ConfigureRoom(modelBuilder);
             ConfigureBooking(modelBuilder);
+            ConfigureUser(modelBuilder);
         }
 
         private static void ConfigureRoom(ModelBuilder modelBuilder)
@@ -117,6 +119,21 @@ namespace RoomBooking.Infrastructure.Persistence
             entity.HasIndex(b => new { b.RoomId, b.Status });
 
         }
+
+        private static void ConfigureUser(ModelBuilder modelBuilder)
+        {
+            var entity = modelBuilder.Entity<User>();
+            entity.ToTable("Users");
+            entity.HasKey(u => u.Id);
+            entity.Property(u => u.Email).IsRequired().HasMaxLength(200);
+            entity.HasIndex(u => u.Email).IsUnique();
+            entity.Property(u => u.PasswordHash).IsRequired();
+            entity.Property(u => u.Role).IsRequired().HasMaxLength(50);
+            entity.Property(u => u.FirstName).HasMaxLength(100);
+            entity.Property(u => u.LastName).HasMaxLength(100);
+            entity.Property(u => u.IsActive).IsRequired();
+            entity.Property(u => u.CreatedAt).IsRequired();
+        }
     }
 
     // ---------------------------
@@ -176,6 +193,15 @@ namespace RoomBooking.Infrastructure.Persistence
             return await _db.Rooms
                 .AsNoTracking()
                 .Where(r => r.IsActive)
+                .OrderBy(r => r.Name)
+                .ToListAsync(ct)
+                .ConfigureAwait(false);
+        }
+
+        public async Task<IReadOnlyList<Room>> ListAllAsync(CancellationToken ct = default)
+        {
+            return await _db.Rooms
+                .AsNoTracking()
                 .OrderBy(r => r.Name)
                 .ToListAsync(ct)
                 .ConfigureAwait(false);
@@ -288,6 +314,82 @@ namespace RoomBooking.Infrastructure.Persistence
 
             return await query.AnyAsync(ct).ConfigureAwait(false);
         }
+
+        public async Task<IReadOnlyList<Booking>> ListAllAsync(CancellationToken ct = default)
+        {
+            return await _db.Bookings
+                .AsNoTracking()
+                .OrderByDescending(b => b.CreatedAt)
+                .ToListAsync(ct)
+                .ConfigureAwait(false);
+        }
+
+        public async Task<IReadOnlyList<Booking>> ListByUserAsync(Guid userId, CancellationToken ct = default)
+        {
+            return await _db.Bookings
+                .AsNoTracking()
+                .Where(b => b.CreatedByUserId == userId)
+                .OrderByDescending(b => b.CreatedAt)
+                .ToListAsync(ct)
+                .ConfigureAwait(false);
+        }
+    }
+
+    internal sealed class UserRepository : IUserRepository
+    {
+        private readonly AppDbContext _db;
+
+        public UserRepository(AppDbContext db)
+        {
+            _db = db;
+        }
+
+        public async Task AddAsync(User entity, CancellationToken ct = default)
+        {
+            await _db.Users.AddAsync(entity, ct).ConfigureAwait(false);
+        }
+
+        public void Remove(User entity)
+        {
+            _db.Users.Remove(entity);
+        }
+
+        public void Update(User entity)
+        {
+            _db.Users.Update(entity);
+        }
+
+        public async Task<User?> GetByIdAsync(Guid id, CancellationToken ct = default)
+        {
+            return await _db.Users
+                .FirstOrDefaultAsync(u => u.Id == id, ct)
+                .ConfigureAwait(false);
+        }
+
+        public async Task<bool> ExistsAsync(Guid id, CancellationToken ct = default)
+        {
+            return await _db.Users
+                .AsNoTracking()
+                .AnyAsync(u => u.Id == id, ct)
+                .ConfigureAwait(false);
+        }
+
+        public async Task<User?> GetByEmailAsync(string email, CancellationToken ct = default)
+        {
+            var normalized = email.Trim().ToLowerInvariant();
+            return await _db.Users
+                .FirstOrDefaultAsync(u => u.Email == normalized, ct)
+                .ConfigureAwait(false);
+        }
+
+        public async Task<IReadOnlyList<User>> ListAllAsync(CancellationToken ct = default)
+        {
+            return await _db.Users
+                .AsNoTracking()
+                .OrderBy(u => u.Email)
+                .ToListAsync(ct)
+                .ConfigureAwait(false);
+        }
     }
 
     // ---------------------------
@@ -303,10 +405,12 @@ namespace RoomBooking.Infrastructure.Persistence
             _dbContext = dbContext;
             Rooms = new RoomRepository(dbContext);
             Bookings = new BookingRepository(dbContext);
+            Users = new UserRepository(dbContext);
         }
 
         public IRoomRepository Rooms { get; }
         public IBookingRepository Bookings { get; }
+        public IUserRepository Users { get; }
 
         public Task<int> SaveChangesAsync(CancellationToken ct = default)
             => _dbContext.SaveChangesAsync(ct);

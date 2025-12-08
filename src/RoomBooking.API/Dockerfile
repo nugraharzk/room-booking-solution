@@ -3,7 +3,7 @@
 # ---------------------------------------------------------
 # Build stage
 # ---------------------------------------------------------
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 
 WORKDIR /src
@@ -18,7 +18,7 @@ RUN dotnet restore src/RoomBooking.API/RoomBooking.API.csproj \
 # ---------------------------------------------------------
 # Runtime stage
 # ---------------------------------------------------------
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final
 
 # Create non-root app user for better security
 RUN useradd -m -s /usr/sbin/nologin appuser
@@ -32,7 +32,7 @@ COPY --from=build /app/publish ./
 # Environment & ports
 ENV ASPNETCORE_URLS=http://+:5050
 # Default Postgres connection string; override via environment in deployment
-ENV ConnectionStrings__DefaultConnection="Host=localhost;Port=5432;Database=roombooking;Username=postgres;Password=postgres123;Include Error Detail=true"
+ENV ConnectionStrings__DefaultConnection="Host=localhost;Port=5433;Database=roombooking;Username=postgres;Password=postgres123;Include Error Detail=true"
 
 EXPOSE 5050
 

@@ -168,6 +168,22 @@ namespace RoomBooking.Application.Bookings
         }
     }
 
+    internal sealed class ListAllRoomsHandler : IRequestHandler<ListAllRoomsQuery, IReadOnlyList<RoomDto>>
+    {
+        private readonly IUnitOfWork _uow;
+
+        public ListAllRoomsHandler(IUnitOfWork uow)
+        {
+            _uow = uow;
+        }
+
+        public async Task<IReadOnlyList<RoomDto>> Handle(ListAllRoomsQuery request, CancellationToken ct)
+        {
+            var rooms = await _uow.Rooms.ListAllAsync(ct);
+            return rooms.Select(r => r.ToDto()).ToList();
+        }
+    }
+
     // Bookings - Command Handlers
 
     internal sealed class CreateBookingHandler : IRequestHandler<CreateBookingCommand, BookingDto>
@@ -393,6 +409,38 @@ namespace RoomBooking.Application.Bookings
                 request.ToExclusive,
                 ct);
 
+            return bookings.Select(b => b.ToDto()).ToList();
+        }
+    }
+
+    internal sealed class ListAllBookingsHandler : IRequestHandler<ListAllBookingsQuery, IReadOnlyList<BookingDto>>
+    {
+        private readonly IUnitOfWork _uow;
+
+        public ListAllBookingsHandler(IUnitOfWork uow)
+        {
+            _uow = uow;
+        }
+
+        public async Task<IReadOnlyList<BookingDto>> Handle(ListAllBookingsQuery request, CancellationToken ct)
+        {
+            var bookings = await _uow.Bookings.ListAllAsync(ct);
+            return bookings.Select(b => b.ToDto()).ToList();
+        }
+    }
+
+    internal sealed class ListMyBookingsHandler : IRequestHandler<ListMyBookingsQuery, IReadOnlyList<BookingDto>>
+    {
+        private readonly IUnitOfWork _uow;
+
+        public ListMyBookingsHandler(IUnitOfWork uow)
+        {
+            _uow = uow;
+        }
+
+        public async Task<IReadOnlyList<BookingDto>> Handle(ListMyBookingsQuery request, CancellationToken ct)
+        {
+            var bookings = await _uow.Bookings.ListByUserAsync(request.UserId, ct);
             return bookings.Select(b => b.ToDto()).ToList();
         }
     }

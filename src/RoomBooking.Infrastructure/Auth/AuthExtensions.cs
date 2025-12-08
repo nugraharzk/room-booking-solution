@@ -32,6 +32,7 @@ namespace RoomBooking.Infrastructure.Auth
             if (section.Exists())
             {
                 section.Bind(jwtOptions);
+                services.Configure<JwtOptions>(section);
             }
 
             configure?.Invoke(jwtOptions);

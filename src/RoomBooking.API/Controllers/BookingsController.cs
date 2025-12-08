@@ -66,6 +66,35 @@ namespace RoomBooking.API.Controllers
         }
 
         /// <summary>
+        /// Lists all bookings (Admin only).
+        /// </summary>
+        [HttpGet("all")]
+        [Authorize(Policy = Policies.RequireAdmin)]
+        [ProducesResponseType(typeof(BookingDto[]), StatusCodes.Status200OK)]
+        public async Task<ActionResult<BookingDto[]>> ListAll(CancellationToken ct)
+        {
+            var list = await _mediator.Send(new ListAllBookingsQuery(), ct);
+            return Ok(list);
+        }
+
+        /// <summary>
+        /// Lists bookings for the current user.
+        /// </summary>
+        [HttpGet("my")]
+        [Authorize(Policy = Policies.BookingsRead)]
+        [ProducesResponseType(typeof(BookingDto[]), StatusCodes.Status200OK)]
+        public async Task<ActionResult<BookingDto[]>> ListMy(CancellationToken ct)
+        {
+            if (!TryGetUserId(out var userId))
+            {
+                return Unauthorized();
+            }
+
+            var list = await _mediator.Send(new ListMyBookingsQuery(userId), ct);
+            return Ok(list);
+        }
+
+        /// <summary>
         /// Lists bookings for a room within a time window.
         /// </summary>
         [HttpGet("room/{roomId:guid}")]

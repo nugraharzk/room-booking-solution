@@ -91,6 +91,8 @@ namespace RoomBooking.Application.Bookings
 
     public sealed record ListActiveRoomsQuery() : IRequest<IReadOnlyList<RoomDto>>;
 
+    public sealed record ListAllRoomsQuery() : IRequest<IReadOnlyList<RoomDto>>;
+
     // Bookings - Commands
 
     public sealed record CreateBookingCommand(
@@ -129,6 +131,12 @@ namespace RoomBooking.Application.Bookings
         [property: Required] Guid RoomId,
         DateTimeOffset FromInclusive,
         DateTimeOffset ToExclusive
+    ) : IRequest<IReadOnlyList<BookingDto>>;
+
+    public sealed record ListAllBookingsQuery() : IRequest<IReadOnlyList<BookingDto>>;
+
+    public sealed record ListMyBookingsQuery(
+        [property: Required] Guid UserId
     ) : IRequest<IReadOnlyList<BookingDto>>;
 
     public sealed record CheckRoomAvailabilityQuery(

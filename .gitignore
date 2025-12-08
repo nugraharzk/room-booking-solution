@@ -83,3 +83,4 @@ data/
 # ---------------------------
 *.secret
 *.secrets
+tools/
