@@ -20,4 +20,14 @@ namespace RoomBooking.Application.Users
     // Commands
     public record UpdateUserRoleCommand(Guid UserId, string NewRole) : IRequest<UserDto>;
     public record ToggleUserActiveCommand(Guid UserId, bool IsActive) : IRequest<UserDto>;
+
+    public record CreateUserCommand(
+        string Email, 
+        string Password, 
+        string FirstName, 
+        string LastName, 
+        string Role
+    ) : IRequest<UserDto>;
+
+    public record DeleteUserCommand(Guid UserId) : IRequest<Unit>;
 }

@@ -11,14 +11,9 @@ namespace RoomBooking.Application.Bookings
 {
     // Rooms - Command Handlers
 
-    internal sealed class CreateRoomHandler : IRequestHandler<CreateRoomCommand, RoomDto>
+    internal sealed class CreateRoomHandler(IUnitOfWork uow) : IRequestHandler<CreateRoomCommand, RoomDto>
     {
-        private readonly IUnitOfWork _uow;
-
-        public CreateRoomHandler(IUnitOfWork uow)
-        {
-            _uow = uow;
-        }
+        private readonly IUnitOfWork _uow = uow;
 
         public async Task<RoomDto> Handle(CreateRoomCommand request, CancellationToken ct)
         {
@@ -41,21 +36,13 @@ namespace RoomBooking.Application.Bookings
         }
     }
 
-    internal sealed class UpdateRoomDetailsHandler : IRequestHandler<UpdateRoomDetailsCommand, RoomDto>
+    internal sealed class UpdateRoomDetailsHandler(IUnitOfWork uow) : IRequestHandler<UpdateRoomDetailsCommand, RoomDto>
     {
-        private readonly IUnitOfWork _uow;
-
-        public UpdateRoomDetailsHandler(IUnitOfWork uow)
-        {
-            _uow = uow;
-        }
+        private readonly IUnitOfWork _uow = uow;
 
         public async Task<RoomDto> Handle(UpdateRoomDetailsCommand request, CancellationToken ct)
         {
-            var room = await _uow.Rooms.GetByIdAsync(request.RoomId, ct);
-            if (room is null)
-                throw new KeyNotFoundException($"Room '{request.RoomId}' was not found.");
-
+            var room = await _uow.Rooms.GetByIdAsync(request.RoomId, ct) ?? throw new KeyNotFoundException($"Room '{request.RoomId}' was not found.");
             var newName = request.Name?.Trim();
             if (string.IsNullOrWhiteSpace(newName))
                 throw new ArgumentException("Room name is required.", nameof(request.Name));
@@ -77,10 +64,6 @@ namespace RoomBooking.Application.Bookings
                 room.UpdateCapacity(request.Capacity);
             }
 
-            // NOTE: Domain entity currently has no method to update Location.
-            // If needed, add a Room.UpdateLocation(string?) method in the domain layer.
-            // For now, ignore Location changes to respect the domain encapsulation.
-
             _uow.Rooms.Update(room);
             await _uow.SaveChangesAsync(ct);
 
@@ -89,22 +72,14 @@ namespace RoomBooking.Application.Bookings
     }
 
 
-    internal sealed class SetRoomActiveHandler : IRequestHandler<SetRoomActiveCommand, RoomDto>
+    internal sealed class SetRoomActiveHandler(IUnitOfWork uow) : IRequestHandler<SetRoomActiveCommand, RoomDto>
 
     {
-        private readonly IUnitOfWork _uow;
-
-        public SetRoomActiveHandler(IUnitOfWork uow)
-        {
-            _uow = uow;
-        }
+        private readonly IUnitOfWork _uow = uow;
 
         public async Task<RoomDto> Handle(SetRoomActiveCommand request, CancellationToken ct)
         {
-            var room = await _uow.Rooms.GetByIdAsync(request.RoomId, ct);
-            if (room is null)
-                throw new KeyNotFoundException($"Room '{request.RoomId}' was not found.");
-
+            var room = await _uow.Rooms.GetByIdAsync(request.RoomId, ct) ?? throw new KeyNotFoundException($"Room '{request.RoomId}' was not found.");
             room.SetActive(request.IsActive);
 
             _uow.Rooms.Update(room);
@@ -114,21 +89,13 @@ namespace RoomBooking.Application.Bookings
         }
     }
 
-    internal sealed class DeleteRoomHandler : IRequestHandler<DeleteRoomCommand, Unit>
+    internal sealed class DeleteRoomHandler(IUnitOfWork uow) : IRequestHandler<DeleteRoomCommand, Unit>
     {
-        private readonly IUnitOfWork _uow;
-
-        public DeleteRoomHandler(IUnitOfWork uow)
-        {
-            _uow = uow;
-        }
+        private readonly IUnitOfWork _uow = uow;
 
         public async Task<Unit> Handle(DeleteRoomCommand request, CancellationToken ct)
         {
-            var room = await _uow.Rooms.GetByIdAsync(request.RoomId, ct);
-            if (room is null)
-                throw new KeyNotFoundException($"Room '{request.RoomId}' was not found.");
-
+            var room = await _uow.Rooms.GetByIdAsync(request.RoomId, ct) ?? throw new KeyNotFoundException($"Room '{request.RoomId}' was not found.");
             _uow.Rooms.Remove(room);
             await _uow.SaveChangesAsync(ct);
 
@@ -138,14 +105,9 @@ namespace RoomBooking.Application.Bookings
 
     // Rooms - Query Handlers
 
-    internal sealed class GetRoomByIdHandler : IRequestHandler<GetRoomByIdQuery, RoomDto?>
+    internal sealed class GetRoomByIdHandler(IUnitOfWork uow) : IRequestHandler<GetRoomByIdQuery, RoomDto?>
     {
-        private readonly IUnitOfWork _uow;
-
-        public GetRoomByIdHandler(IUnitOfWork uow)
-        {
-            _uow = uow;
-        }
+        private readonly IUnitOfWork _uow = uow;
 
         public async Task<RoomDto?> Handle(GetRoomByIdQuery request, CancellationToken ct)
         {
@@ -154,14 +116,9 @@ namespace RoomBooking.Application.Bookings
         }
     }
 
-    internal sealed class GetRoomByNameHandler : IRequestHandler<GetRoomByNameQuery, RoomDto?>
+    internal sealed class GetRoomByNameHandler(IUnitOfWork uow) : IRequestHandler<GetRoomByNameQuery, RoomDto?>
     {
-        private readonly IUnitOfWork _uow;
-
-        public GetRoomByNameHandler(IUnitOfWork uow)
-        {
-            _uow = uow;
-        }
+        private readonly IUnitOfWork _uow = uow;
 
         public async Task<RoomDto?> Handle(GetRoomByNameQuery request, CancellationToken ct)
         {
@@ -174,14 +131,9 @@ namespace RoomBooking.Application.Bookings
         }
     }
 
-    internal sealed class ListActiveRoomsHandler : IRequestHandler<ListActiveRoomsQuery, IReadOnlyList<RoomDto>>
+    internal sealed class ListActiveRoomsHandler(IUnitOfWork uow) : IRequestHandler<ListActiveRoomsQuery, IReadOnlyList<RoomDto>>
     {
-        private readonly IUnitOfWork _uow;
-
-        public ListActiveRoomsHandler(IUnitOfWork uow)
-        {
-            _uow = uow;
-        }
+        private readonly IUnitOfWork _uow = uow;
 
         public async Task<IReadOnlyList<RoomDto>> Handle(ListActiveRoomsQuery request, CancellationToken ct)
         {
@@ -190,14 +142,9 @@ namespace RoomBooking.Application.Bookings
         }
     }
 
-    internal sealed class ListAllRoomsHandler : IRequestHandler<ListAllRoomsQuery, IReadOnlyList<RoomDto>>
+    internal sealed class ListAllRoomsHandler(IUnitOfWork uow) : IRequestHandler<ListAllRoomsQuery, IReadOnlyList<RoomDto>>
     {
-        private readonly IUnitOfWork _uow;
-
-        public ListAllRoomsHandler(IUnitOfWork uow)
-        {
-            _uow = uow;
-        }
+        private readonly IUnitOfWork _uow = uow;
 
         public async Task<IReadOnlyList<RoomDto>> Handle(ListAllRoomsQuery request, CancellationToken ct)
         {
@@ -208,14 +155,9 @@ namespace RoomBooking.Application.Bookings
 
     // Bookings - Command Handlers
 
-    internal sealed class CreateBookingHandler : IRequestHandler<CreateBookingCommand, BookingDto>
+    internal sealed class CreateBookingHandler(IUnitOfWork uow) : IRequestHandler<CreateBookingCommand, BookingDto>
     {
-        private readonly IUnitOfWork _uow;
-
-        public CreateBookingHandler(IUnitOfWork uow)
-        {
-            _uow = uow;
-        }
+        private readonly IUnitOfWork _uow = uow;
 
         public async Task<BookingDto> Handle(CreateBookingCommand request, CancellationToken ct)
         {
@@ -227,9 +169,7 @@ namespace RoomBooking.Application.Bookings
             var start = new DateTimeOffset(request.Date.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero);
             var end = new DateTimeOffset(request.Date.ToDateTime(TimeOnly.MaxValue), TimeSpan.Zero);
 
-            var room = await _uow.Rooms.GetByIdAsync(request.RoomId, ct);
-            if (room is null)
-                throw new KeyNotFoundException($"Room '{request.RoomId}' was not found.");
+            var room = await _uow.Rooms.GetByIdAsync(request.RoomId, ct) ?? throw new KeyNotFoundException($"Room '{request.RoomId}' was not found.");
             if (!room.IsActive)
                 throw new InvalidOperationException("Room is not active for booking.");
 
@@ -262,20 +202,13 @@ namespace RoomBooking.Application.Bookings
         }
     }
 
-    internal sealed class ConfirmBookingHandler : IRequestHandler<ConfirmBookingCommand, BookingDto>
+    internal sealed class ConfirmBookingHandler(IUnitOfWork uow) : IRequestHandler<ConfirmBookingCommand, BookingDto>
     {
-        private readonly IUnitOfWork _uow;
-
-        public ConfirmBookingHandler(IUnitOfWork uow)
-        {
-            _uow = uow;
-        }
+        private readonly IUnitOfWork _uow = uow;
 
         public async Task<BookingDto> Handle(ConfirmBookingCommand request, CancellationToken ct)
         {
-            var booking = await _uow.Bookings.GetByIdAsync(request.BookingId, ct);
-            if (booking is null)
-                throw new KeyNotFoundException($"Booking '{request.BookingId}' was not found.");
+            var booking = await _uow.Bookings.GetByIdAsync(request.BookingId, ct) ?? throw new KeyNotFoundException($"Booking '{request.BookingId}' was not found.");
 
             // Overlap safety check before confirming
             var overlapping = await _uow.Bookings.ListOverlappingAsync(
@@ -285,9 +218,7 @@ namespace RoomBooking.Application.Bookings
                 ct);
 
             // Exclude itself, and exclude cancelled bookings
-            overlapping = overlapping
-                .Where(b => b.Id != booking.Id && b.Status != BookingStatus.Cancelled)
-                .ToList();
+            overlapping = [.. overlapping.Where(b => b.Id != booking.Id && b.Status != BookingStatus.Cancelled)];
 
             booking.Confirm(overlapping);
             _uow.Bookings.Update(booking);
@@ -297,21 +228,13 @@ namespace RoomBooking.Application.Bookings
         }
     }
 
-    internal sealed class CancelBookingHandler : IRequestHandler<CancelBookingCommand, BookingDto>
+    internal sealed class CancelBookingHandler(IUnitOfWork uow) : IRequestHandler<CancelBookingCommand, BookingDto>
     {
-        private readonly IUnitOfWork _uow;
-
-        public CancelBookingHandler(IUnitOfWork uow)
-        {
-            _uow = uow;
-        }
+        private readonly IUnitOfWork _uow = uow;
 
         public async Task<BookingDto> Handle(CancelBookingCommand request, CancellationToken ct)
         {
-            var booking = await _uow.Bookings.GetByIdAsync(request.BookingId, ct);
-            if (booking is null)
-                throw new KeyNotFoundException($"Booking '{request.BookingId}' was not found.");
-
+            var booking = await _uow.Bookings.GetByIdAsync(request.BookingId, ct) ?? throw new KeyNotFoundException($"Booking '{request.BookingId}' was not found.");
             booking.Cancel();
             _uow.Bookings.Update(booking);
             await _uow.SaveChangesAsync(ct);
@@ -320,21 +243,27 @@ namespace RoomBooking.Application.Bookings
         }
     }
 
-    internal sealed class RescheduleBookingHandler : IRequestHandler<RescheduleBookingCommand, BookingDto>
+    internal sealed class DeleteBookingHandler(IUnitOfWork uow) : IRequestHandler<DeleteBookingCommand, Unit>
     {
-        private readonly IUnitOfWork _uow;
+        private readonly IUnitOfWork _uow = uow;
 
-        public RescheduleBookingHandler(IUnitOfWork uow)
+        public async Task<Unit> Handle(DeleteBookingCommand request, CancellationToken ct)
         {
-            _uow = uow;
+            var booking = await _uow.Bookings.GetByIdAsync(request.BookingId, ct) ?? throw new KeyNotFoundException($"Booking '{request.BookingId}' was not found.");
+            _uow.Bookings.Remove(booking);
+            await _uow.SaveChangesAsync(ct);
+
+            return Unit.Value;
         }
+    }
+
+    internal sealed class RescheduleBookingHandler(IUnitOfWork uow) : IRequestHandler<RescheduleBookingCommand, BookingDto>
+    {
+        private readonly IUnitOfWork _uow = uow;
 
         public async Task<BookingDto> Handle(RescheduleBookingCommand request, CancellationToken ct)
         {
-            var booking = await _uow.Bookings.GetByIdAsync(request.BookingId, ct);
-            if (booking is null)
-                throw new KeyNotFoundException($"Booking '{request.BookingId}' was not found.");
-
+            var booking = await _uow.Bookings.GetByIdAsync(request.BookingId, ct) ?? throw new KeyNotFoundException($"Booking '{request.BookingId}' was not found.");
             if (request.NewEnd <= request.NewStart)
                 throw new ArgumentException("NewEnd must be greater than NewStart.");
 
@@ -361,9 +290,7 @@ namespace RoomBooking.Application.Bookings
                 request.NewEnd,
                 ct);
 
-            overlapping = overlapping
-                .Where(b => b.Id != booking.Id && b.Status != BookingStatus.Cancelled)
-                .ToList();
+            overlapping = [.. overlapping.Where(b => b.Id != booking.Id && b.Status != BookingStatus.Cancelled)];
 
             booking.Reschedule(newRange, overlapping);
             _uow.Bookings.Update(booking);
@@ -384,10 +311,7 @@ namespace RoomBooking.Application.Bookings
 
         public async Task<BookingDto> Handle(CompleteBookingCommand request, CancellationToken ct)
         {
-            var booking = await _uow.Bookings.GetByIdAsync(request.BookingId, ct);
-            if (booking is null)
-                throw new KeyNotFoundException($"Booking '{request.BookingId}' was not found.");
-
+            var booking = await _uow.Bookings.GetByIdAsync(request.BookingId, ct) ?? throw new KeyNotFoundException($"Booking '{request.BookingId}' was not found.");
             booking.Complete();
             _uow.Bookings.Update(booking);
             await _uow.SaveChangesAsync(ct);
@@ -398,14 +322,9 @@ namespace RoomBooking.Application.Bookings
 
     // Bookings - Query Handlers
 
-    internal sealed class GetBookingByIdHandler : IRequestHandler<GetBookingByIdQuery, BookingDto?>
+    internal sealed class GetBookingByIdHandler(IUnitOfWork uow) : IRequestHandler<GetBookingByIdQuery, BookingDto?>
     {
-        private readonly IUnitOfWork _uow;
-
-        public GetBookingByIdHandler(IUnitOfWork uow)
-        {
-            _uow = uow;
-        }
+        private readonly IUnitOfWork _uow = uow;
 
         public async Task<BookingDto?> Handle(GetBookingByIdQuery request, CancellationToken ct)
         {
@@ -414,14 +333,9 @@ namespace RoomBooking.Application.Bookings
         }
     }
 
-    internal sealed class ListBookingsForRoomHandler : IRequestHandler<ListBookingsForRoomQuery, IReadOnlyList<BookingDto>>
+    internal sealed class ListBookingsForRoomHandler(IUnitOfWork uow) : IRequestHandler<ListBookingsForRoomQuery, IReadOnlyList<BookingDto>>
     {
-        private readonly IUnitOfWork _uow;
-
-        public ListBookingsForRoomHandler(IUnitOfWork uow)
-        {
-            _uow = uow;
-        }
+        private readonly IUnitOfWork _uow = uow;
 
         public async Task<IReadOnlyList<BookingDto>> Handle(ListBookingsForRoomQuery request, CancellationToken ct)
         {
@@ -441,14 +355,9 @@ namespace RoomBooking.Application.Bookings
         }
     }
 
-    internal sealed class ListAllBookingsHandler : IRequestHandler<ListAllBookingsQuery, IReadOnlyList<BookingDto>>
+    internal sealed class ListAllBookingsHandler(IUnitOfWork uow) : IRequestHandler<ListAllBookingsQuery, IReadOnlyList<BookingDto>>
     {
-        private readonly IUnitOfWork _uow;
-
-        public ListAllBookingsHandler(IUnitOfWork uow)
-        {
-            _uow = uow;
-        }
+        private readonly IUnitOfWork _uow = uow;
 
         public async Task<IReadOnlyList<BookingDto>> Handle(ListAllBookingsQuery request, CancellationToken ct)
         {
@@ -457,30 +366,20 @@ namespace RoomBooking.Application.Bookings
         }
     }
 
-    internal sealed class ListMyBookingsHandler : IRequestHandler<ListMyBookingsQuery, IReadOnlyList<BookingDto>>
+    internal sealed class ListMyBookingsHandler(IUnitOfWork uow) : IRequestHandler<ListMyBookingsQuery, IReadOnlyList<BookingDto>>
     {
-        private readonly IUnitOfWork _uow;
-
-        public ListMyBookingsHandler(IUnitOfWork uow)
-        {
-            _uow = uow;
-        }
+        private readonly IUnitOfWork _uow = uow;
 
         public async Task<IReadOnlyList<BookingDto>> Handle(ListMyBookingsQuery request, CancellationToken ct)
         {
             var bookings = await _uow.Bookings.ListByUserAsync(request.UserId, ct);
-            return bookings.Select(b => b.ToDto()).ToList();
+            return [.. bookings.Select(b => b.ToDto())];
         }
     }
 
-    internal sealed class CheckRoomAvailabilityHandler : IRequestHandler<CheckRoomAvailabilityQuery, bool>
+    internal sealed class CheckRoomAvailabilityHandler(IUnitOfWork uow) : IRequestHandler<CheckRoomAvailabilityQuery, bool>
     {
-        private readonly IUnitOfWork _uow;
-
-        public CheckRoomAvailabilityHandler(IUnitOfWork uow)
-        {
-            _uow = uow;
-        }
+        private readonly IUnitOfWork _uow = uow;
 
         public async Task<bool> Handle(CheckRoomAvailabilityQuery request, CancellationToken ct)
         {

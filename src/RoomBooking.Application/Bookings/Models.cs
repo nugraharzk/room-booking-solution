@@ -62,35 +62,35 @@ namespace RoomBooking.Application.Bookings
     // Rooms - Commands
 
     public sealed record CreateRoomCommand(
-        [property: Required, MinLength(1)] string Name,
-        [property: Range(1, int.MaxValue)] int Capacity,
+        [Required, MinLength(1)] string Name,
+        [Range(1, int.MaxValue)] int Capacity,
         string? Location
     ) : IRequest<RoomDto>;
 
     public sealed record UpdateRoomDetailsCommand(
-        [property: Required] Guid RoomId,
-        [property: Required, MinLength(1)] string Name,
-        [property: Range(1, int.MaxValue)] int Capacity,
+        [Required] Guid RoomId,
+        [Required, MinLength(1)] string Name,
+        [Range(1, int.MaxValue)] int Capacity,
         string? Location
     ) : IRequest<RoomDto>;
 
     public sealed record SetRoomActiveCommand(
-        [property: Required] Guid RoomId,
+        [Required] Guid RoomId,
         bool IsActive
     ) : IRequest<RoomDto>;
 
     public sealed record DeleteRoomCommand(
-        [property: Required] Guid RoomId
+        [Required] Guid RoomId
     ) : IRequest<Unit>;
 
     // Rooms - Queries
 
     public sealed record GetRoomByIdQuery(
-        [property: Required] Guid RoomId
+        [Required] Guid RoomId
     ) : IRequest<RoomDto?>;
 
     public sealed record GetRoomByNameQuery(
-        [property: Required, MinLength(1)] string Name
+        [Required, MinLength(1)] string Name
     ) : IRequest<RoomDto?>;
 
     public sealed record ListActiveRoomsQuery() : IRequest<IReadOnlyList<RoomDto>>;
@@ -100,38 +100,42 @@ namespace RoomBooking.Application.Bookings
     // Bookings - Commands
 
     public sealed record CreateBookingCommand(
-        [property: Required] Guid RoomId,
-        [property: Required] Guid CreatedByUserId,
+        [Required] Guid RoomId,
+        [Required] Guid CreatedByUserId,
         DateOnly Date,
-        [property: MaxLength(200)] string? Subject
+        [MaxLength(200)] string? Subject
     ) : IRequest<BookingDto>;
 
     public sealed record ConfirmBookingCommand(
-        [property: Required] Guid BookingId
+        [Required] Guid BookingId
     ) : IRequest<BookingDto>;
 
     public sealed record CancelBookingCommand(
-        [property: Required] Guid BookingId
+        [Required] Guid BookingId
     ) : IRequest<BookingDto>;
 
+    public sealed record DeleteBookingCommand(
+        [Required] Guid BookingId
+    ) : IRequest<Unit>;
+
     public sealed record RescheduleBookingCommand(
-        [property: Required] Guid BookingId,
+        [Required] Guid BookingId,
         DateTimeOffset NewStart,
         DateTimeOffset NewEnd
     ) : IRequest<BookingDto>;
 
     public sealed record CompleteBookingCommand(
-        [property: Required] Guid BookingId
+        [Required] Guid BookingId
     ) : IRequest<BookingDto>;
 
     // Bookings - Queries
 
     public sealed record GetBookingByIdQuery(
-        [property: Required] Guid BookingId
+        [Required] Guid BookingId
     ) : IRequest<BookingDto?>;
 
     public sealed record ListBookingsForRoomQuery(
-        [property: Required] Guid RoomId,
+        [Required] Guid RoomId,
         DateTimeOffset FromInclusive,
         DateTimeOffset ToExclusive
     ) : IRequest<IReadOnlyList<BookingDto>>;
@@ -139,11 +143,11 @@ namespace RoomBooking.Application.Bookings
     public sealed record ListAllBookingsQuery() : IRequest<IReadOnlyList<BookingDto>>;
 
     public sealed record ListMyBookingsQuery(
-        [property: Required] Guid UserId
+        [Required] Guid UserId
     ) : IRequest<IReadOnlyList<BookingDto>>;
 
     public sealed record CheckRoomAvailabilityQuery(
-        [property: Required] Guid RoomId,
+        [Required] Guid RoomId,
         DateTimeOffset Start,
         DateTimeOffset End
     ) : IRequest<bool>;

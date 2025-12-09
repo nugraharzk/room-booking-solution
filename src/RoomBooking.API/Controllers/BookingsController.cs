@@ -140,6 +140,19 @@ namespace RoomBooking.API.Controllers
         }
 
         /// <summary>
+        /// Deletes a booking (Admin/Manager only).
+        /// </summary>
+        [HttpDelete("{id:guid}")]
+        [Authorize(Policy = Policies.RequireManager)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> Delete([FromRoute] Guid id, CancellationToken ct)
+        {
+            await _mediator.Send(new DeleteBookingCommand(id), ct);
+            return NoContent();
+        }
+
+        /// <summary>
         /// Completes a booking (only allowed after it ends and if confirmed).
         /// </summary>
         [HttpPost("{id:guid}/complete")]

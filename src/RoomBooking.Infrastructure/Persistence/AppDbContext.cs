@@ -140,14 +140,9 @@ namespace RoomBooking.Infrastructure.Persistence
     // Repository Implementations
     // ---------------------------
 
-    internal sealed class RoomRepository : IRoomRepository
+    internal sealed class RoomRepository(AppDbContext db) : IRoomRepository
     {
-        private readonly AppDbContext _db;
-
-        public RoomRepository(AppDbContext db)
-        {
-            _db = db;
-        }
+        private readonly AppDbContext _db = db;
 
         public async Task AddAsync(Room entity, CancellationToken ct = default)
         {
@@ -217,14 +212,9 @@ namespace RoomBooking.Infrastructure.Persistence
         }
     }
 
-    internal sealed class BookingRepository : IBookingRepository
+    internal sealed class BookingRepository(AppDbContext db) : IBookingRepository
     {
-        private readonly AppDbContext _db;
-
-        public BookingRepository(AppDbContext db)
-        {
-            _db = db;
-        }
+        private readonly AppDbContext _db = db;
 
         public async Task AddAsync(Booking entity, CancellationToken ct = default)
         {
@@ -335,14 +325,9 @@ namespace RoomBooking.Infrastructure.Persistence
         }
     }
 
-    internal sealed class UserRepository : IUserRepository
+    internal sealed class UserRepository(AppDbContext db) : IUserRepository
     {
-        private readonly AppDbContext _db;
-
-        public UserRepository(AppDbContext db)
-        {
-            _db = db;
-        }
+        private readonly AppDbContext _db = db;
 
         public async Task AddAsync(User entity, CancellationToken ct = default)
         {
@@ -396,27 +381,13 @@ namespace RoomBooking.Infrastructure.Persistence
     // Unit of Work implementation
     // ---------------------------
 
-
-
-
-
-
-
-    public sealed class EfUnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
+    public sealed class EfUnitOfWork(AppDbContext dbContext) : IUnitOfWork, IAsyncDisposable, IDisposable
     {
-        private readonly AppDbContext _dbContext;
+        private readonly AppDbContext _dbContext = dbContext;
 
-        public IRoomRepository Rooms { get; }
-        public IBookingRepository Bookings { get; }
-        public IUserRepository Users { get; }
-
-        public EfUnitOfWork(AppDbContext dbContext)
-        {
-            _dbContext = dbContext;
-            Rooms = new RoomRepository(dbContext);
-            Bookings = new BookingRepository(dbContext);
-            Users = new UserRepository(dbContext);
-        }
+        public IRoomRepository Rooms { get; } = new RoomRepository(dbContext);
+        public IBookingRepository Bookings { get; } = new BookingRepository(dbContext);
+        public IUserRepository Users { get; } = new UserRepository(dbContext);
 
         public async Task<int> SaveChangesAsync(CancellationToken ct = default)
         {
@@ -441,14 +412,9 @@ namespace RoomBooking.Infrastructure.Persistence
         }
     }
 
-    internal sealed class EfTransaction : ITransaction
+    internal sealed class EfTransaction(IDbContextTransaction inner) : ITransaction
     {
-        private readonly IDbContextTransaction _inner;
-
-        public EfTransaction(IDbContextTransaction inner)
-        {
-            _inner = inner ?? throw new ArgumentNullException(nameof(inner));
-        }
+        private readonly IDbContextTransaction _inner = inner ?? throw new ArgumentNullException(nameof(inner));
 
         public async Task CommitAsync(CancellationToken ct = default)
         {

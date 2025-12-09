@@ -34,7 +34,7 @@ A complete full-stack solution for internal room booking, featuring a .NET 9 Web
 
    - **API**: `http://localhost:5200`
    - **Frontend**: `http://localhost:3200` (proxies to API)
-   - **Database**: PostgreSQL on `localhost:5433`
+   - **Database**: PostgreSQL on `localhost:5432`
 
 2. **Access the App**:
    Open `http://localhost:3200` in your browser.
@@ -114,7 +114,7 @@ Authentication is JWT-based.
 
 - `docker-compose.yml` maps:
   - API: `5050:5050` (Internal) -> Mapped to Host `5200` if running via dotnet run, or `5050` if strictly docker.
-  - DB: `5432` (Internal) -> Host `5433` (to avoid conflicts with local Postgres).
+  - DB: `5432` (Internal) -> Host `5432` (standard Postgres port).
 
 ## License
 
